@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playwrite+TZ:wght@100..400&display=swap" rel="stylesheet">
+
+
+  <title>Cat Image Generator 🎁</title>
+  <link rel="icon" type="image/jpeg" href="smilycatfav.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: "Playwrite TZ", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-align: center;
+      background-image: url("ornaments.webp");
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed; /* optional */
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 0px 50px 50px 50px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      z-index: -3;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      color: #d82b2d;
+      margin-bottom: 0px;
+    }
+
+    p {
+      margin-top: 0px;
+      font-size: 2em;
+      color: #fff;
+    }
+    .cat-container {
+      margin-top: 20px;
+      display: block; /* default stacked on mobile */
+    }
+    .cat-image {
+      border: 5px solid #ccc;
+      border-radius: 10px;
+      margin: 10px auto;
+      max-width: 100%;
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.3s ease;
+      display: block;
+      will-change: opacity, transform, filter;
+      cursor: pointer;
+    }
+    .cat-image.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .cat-image:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+      transition: transform 0.3s ease, filter 0.3s ease;
+      z-index: 5;
+      position: relative;
+    }
+    .comic-button {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      color: #fff;
+      background-color: #d82b2d;
+      border: 2px solid #000;
+      border-radius: 10px;
+      box-shadow: 5px 5px 0px #000;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .comic-button:hover {
+      background-color: #fff;
+      color: #ff5252;
+      border: 2px solid #ff5252;
+      box-shadow: 5px 5px 0px #ff5252;
+  }
+  
+  .comic-button:active {
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: none;
+    transform: translateY(4px);
+  }
+
+    @media screen and (min-width: 1024px) {
+    .cat-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-gap: 15px;
+      justify-items: center;
+    }
+
+    .cat-image,
+    .gift-wrapper {
+      margin: 0;
+      width: 100%;
+      max-width: 100%;
+      cursor: pointer;
+    }
+  }
+
+  /* Entry animation for newly added cats & gifts */
+  .fade-in-enter {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+
+  .fade-in-enter-active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .fade-in-enter,
+    .fade-in-enter-active {
+      transition: none;
+      transform: none;
+    }
+  }
+
+
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+      padding: 1rem; /* breathing room on small screens */
+    }
+
+    .modal-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Modal container adapts to screen size */
+    .modal-content {
+      position: relative;
+      max-width: min(90vw, 900px);
+      max-height: min(90vh, 90svh);
+      width: auto;
+      height: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* The key fix */
+    .modal-content img {
+      max-width: 100%;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 12px;
+      animation: modalZoom 1s ease-out;
+    }
+
+        @keyframes modalZoom {
+      from {
+        transform: scale(0.95);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: -15px;
+      right: -15px;
+      background: red;
+      border-radius: 50%;
+      border: none;
+      font-size: 24px;
+      font-weight: bold;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      line-height: 38px;
+      text-align: center;
+      padding: 0;
+    }
+
+    @keyframes confetti-fall {
+  0% { 
+    transform: translateY(0) rotate(0deg) translateX(0); 
+    opacity: 1; 
+  }
+  100% { 
+    /* This uses the random drift value we will set in JS */
+    transform: translateY(100vh) rotate(720deg) translateX(var(--drift)); 
+    opacity: 0; 
+  }
+}
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+      animation: confetti-fall 2.5s ease-in forwards;
+      pointer-events: none;
+      z-index: 9999;
+}
+
+  .my-background-div {
+    background-image: url("ornaments.webp");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
+  /* giftbox code */
+@keyframes box-lid {
+  0%, 42% {
+    transform: translate3d(-50%, 0%, 0) rotate(0deg);
+  }
+  60% {
+    transform: translate3d(-85%, -230%, 0) rotate(-25deg);
+  }
+  90%, 100% {
+    transform: translate3d(-119%, 225%, 0) rotate(-70deg);
+  }
+}
+
+@keyframes box-body {
+  0% {
+    transform: translate3d(0%, 0%, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate3d(0%, 25%, 0) rotate(20deg);
+  }
+  50% {
+    transform: translate3d(0%, -15%, 0) rotate(0deg);
+  }
+  70%, 100% {
+    transform: translate3d(0%, 0%, 0) rotate(0deg);
+  }
+}
+
+@keyframes box-bowtie-right {
+  0%, 50%, 75% {
+    transform: translateX(0%) rotate(90deg) skew(10deg, 10deg);
+  }
+  90%, 100% {
+    transform: translate(-50%, -15%) rotate(45deg) skew(10deg, 10deg);
+    box-shadow: 0px 4px 8px -4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes box-bowtie-left {
+  0% {
+    transform: translateX(-100%) rotate(0deg) skew(10deg, 10deg);
+  }
+  50%, 75% {
+    transform: translate(-50%, -15%) rotate(45deg) skew(10deg, 10deg);
+  }
+  90%, 100% {
+    transform: translateX(-100%) rotate(0deg) skew(10deg, 10deg);
+  }
+}
+
+
+/* Click state: use .opened class instead of :hover */
+.gift-wrapper {
+  width: 100%;
+  max-width: 100%;
+  margin: 10px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Keep consistent border radius and spacing like .cat-image */
+.gift-wrapper .box {
+  position: relative;
+  width: 100%;
+  max-width: 220px;      /* similar to your cat images in the grid */
+  height: 220px;
+  margin: 10px auto 0;
+  margin-top: 50px;
+}
+
+/* Tone down or remove the big blue circle so it doesn't overflow the cell */
+.gift-wrapper .box::before {
+  content: "";
+  width: 260px;          /* smaller than 440px so it fits the grid */
+  height: 260px;
+  background-color: #89cff0;
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 1 !important;
+  display: none;
+}
+
+/* Let the box body fill the box */
+.gift-wrapper .box-body {
+  position: relative;
+  width: 100%;
+  height: 70%;           /* leave some room for lid above */
+  margin-top: 30%;       /* similar offset to original but more compact */
+  background-color: #cc231e;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(#762c2c, #ff0303);
+}
+
+/* Ribbon scales with the box */
+.gift-wrapper .box-body::after {
+  width: 25%;            /* proportional ribbon width */
+}
+
+/* Lid matches box width */
+.gift-wrapper .box-lid {
+  width: 115%;
+  max-width: 260px;
+}
+
+/* Hint text styled like caption under cat */
+.gift-hint {
+  color: #fff;
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+
+.box-body.opened {
+  cursor: pointer;
+  animation: box-body 1s forwards ease-in-out;
+}
+
+.box-body.opened .box-lid {
+  animation: box-lid 1s forwards ease-in-out;
+}
+
+.box-body.opened .box-bowtie::before {
+  animation: box-bowtie-left 1.1s forwards ease-in-out;
+}
+
+.box-body.opened .box-bowtie::after {
+  animation: box-bowtie-right 1.1s forwards ease-in-out;
+}
+
+/* Hint text under the gift */
+.gift-hint {
+  color: #fff;
+  font-size: 0.9rem;
+  margin-top: 0px;
+}
+
+/* Core gift box styles (from CodePen, simplified to fit your layout) */
+.box {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 40px auto 0;
+}
+
+.box::before {
+  content: "";
+  width: 440px;
+  height: 440px;
+  background-color: #ff0000;
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 1 !important;
+}
+
+.box-body {
+  position: relative;
+  height: 200px;
+  width: 200px;
+  background-color: #cc231e;
+  border-bottom-left-radius: 5%;
+  border-bottom-right-radius: 5%;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(#762c2c, #ff0303);
+}
+
+/* vertical ribbon */
+.box-body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  background: linear-gradient(#ffffff, #ffefa0);
+}
+
+.box-lid {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 90%;
+  height: 40px;
+  width: 220px;
+  background-color: #cc231e;
+  border-radius: 5%;
+  box-shadow: 0 8px 4px -4px rgba(0, 0, 0, 0.3);
+}
+
+.box-lid::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  background: linear-gradient(#ffefa0, #fff);
+}
+
+.box-bowtie {
+  z-index: 1;
+  height: 100%;
+}
+
+.box-bowtie::before,
+.box-bowtie::after {
+  content: "";
+  width: 83.333px;
+  height: 83.333px;
+  border: 16.667px solid white;
+  border-radius: 50% 50% 0 50%;
+  position: absolute;
+  bottom: 99%;
+  z-index: -1;
+}
+
+.box-bowtie::before {
+  left: 50%;
+  transform: translateX(-100%) skew(10deg, 10deg);
+}
+
+.box-bowtie::after {
+  left: 50%;
+  transform: translateX(0%) rotate(90deg) skew(10deg, 10deg);
+}
+
+/* CLICK state (was :hover in CodePen) */
+.box-body.opened {
+  cursor: pointer;
+  animation: box-body 1s forwards ease-in-out;
+}
+
+.box-body.opened .box-lid {
+  animation: box-lid 1s forwards ease-in-out;
+}
+
+.box-body.opened .box-bowtie::before {
+  animation: box-bowtie-left 1.1s forwards ease-in-out;
+}
+
+.box-body.opened .box-bowtie::after {
+  animation: box-bowtie-right 1.1s forwards ease-in-out;
+}
+
+
+
+  
+
+  </style>
+</head>
+<body>
+  <div class="my-background-div"></div>  
+
+  <div class="container">
+    <h1>🎁Cat Image Generator🎁</h1>
+    <p>Merry Christmas!</p>
+    <div class="cat-container" id="catContainer"></div>
+    <button class="comic-button" id="fetchButton">Fetch More Cats</button>
+  </div>
+
+  <!-- Modal overlay -->
+  <div id="modalOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content">
+      <button id="modalClose" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      <img id="modalImage" src="" alt="Expanded cat image">
+    </div>
+  </div>
+
+
+  <script>
+    const localCatImages = [
+      'cat/HolderleCats/cat1.jpg',
+      'cat/HolderleCats/cat2.jpg',
+      'cat/HolderleCats/cat3.jpg',
+      'cat/HolderleCats/cat4.jpg',
+      'cat/HolderleCats/cat5.jpg',
+      'cat/HolderleCats/cat6.jpg',
+      'cat/HolderleCats/cat7.jpg',
+      'cat/HolderleCats/cat8.jpg',
+      'cat/HolderleCats/cat9.jpg',
+      'cat/HolderleCats/cat10.jpg',
+      'cat/HolderleCats/cat11.jpg',
+      'cat/HolderleCats/cat12.jpg',
+      'cat/HolderleCats/cat13.jpg',
+      'cat/HolderleCats/cat14.jpg',
+      'cat/HolderleCats/cat15.jpg',
+      'cat/HolderleCats/cat16.jpg',
+      'cat/HolderleCats/cat17.jpg',
+      'cat/HolderleCats/cat18.jpg',
+      'cat/HolderleCats/cat19.jpg',
+      'cat/HolderleCats/cat20.jpg',
+      'cat/HolderleCats/cat21.jpg',
+      'cat/HolderleCats/cat22.jpg',
+      'cat/HolderleCats/cat23.jpg',
+      'cat/HolderleCats/cat24.jpg',
+      'cat/HolderleCats/cat25.jpg',
+      'cat/HolderleCats/cat26.jpg',
+      'cat/HolderleCats/cat27.jpg',
+      'cat/HolderleCats/cat28.jpg',
+      'cat/HolderleCats/cat29.jpg',
+      'cat/HolderleCats/cat30.jpg',
+      'cat/HolderleCats/cat31.jpg',
+      'cat/HolderleCats/cat32.jpg',
+      'cat/HolderleCats/cat33.jpg',
+      'cat/HolderleCats/cat34.jpg',
+      'cat/HolderleCats/cat35.jpg',
+      'cat/HolderleCats/cat36.jpg',
+      'cat/HolderleCats/cat37.jpg',
+      'cat/HolderleCats/cat38.jpg',
+      'cat/HolderleCats/cat39.jpg',
+      'cat/HolderleCats/cat40.jpg',
+      'cat/HolderleCats/cat41.jpg',
+      'cat/HolderleCats/cat42.jpg',
+      'cat/HolderleCats/cat43.jpg',
+      'cat/HolderleCats/cat44.jpg',
+      'cat/HolderleCats/cat45 (1).jpg',
+      'cat/HolderleCats/cat45 (2).jpg',
+      'cat/HolderleCats/cat45 (3).jpg',
+      'cat/HolderleCats/cat45 (4).jpg',
+      'cat/HolderleCats/cat45 (5).jpg',
+      'cat/HolderleCats/cat45 (6).jpg',
+      'cat/HolderleCats/cat45 (7).jpg',
+      'cat/HolderleCats/cat45 (8).jpg',
+      'cat/HolderleCats/cat45 (9).jpg',
+      'cat/HolderleCats/cat45 (10).jpg',
+      'cat/HolderleCats/cat45 (11).jpg',
+      'cat/HolderleCats/cat45 (12).jpg',
+      'cat/HolderleCats/cat45 (13).jpg',
+      'cat/HolderleCats/cat45 (14).jpg',
+      'cat/HolderleCats/cat45 (15).jpg',
+      'cat/HolderleCats/cat45 (16).jpg',
+      'cat/HolderleCats/cat45 (17).jpg',
+      'cat/HolderleCats/cat45 (18).jpg',
+      'cat/HolderleCats/cat45 (19).jpg',
+      'cat/HolderleCats/cat45 (20).jpg',
+      'cat/HolderleCats/cat45 (21).jpg',
+      'cat/HolderleCats/cat45 (22).jpg',
+      'cat/HolderleCats/cat45 (23).jpg',
+      'cat/HolderleCats/cat45 (24).jpg',
+      'cat/HolderleCats/cat45 (25).jpg',
+      'cat/HolderleCats/cat45 (26).jpg',
+      'cat/HolderleCats/cat45 (27).jpg',
+      'cat/HolderleCats/cat45 (28).jpg',
+      'cat/HolderleCats/cat45 (29).jpg',
+      'cat/HolderleCats/cat45 (30).jpg',
+      'cat/HolderleCats/cat45 (31).jpg',
+      'cat/HolderleCats/cat45 (32).jpg',
+      'cat/HolderleCats/cat45 (33).jpg',
+      'cat/HolderleCats/cat45 (34).jpg',
+      'cat/HolderleCats/cat45 (35).jpg',
+      'cat/HolderleCats/cat45 (36).jpg',
+      'cat/HolderleCats/cat45 (37).jpg',
+      'cat/HolderleCats/cat45 (38).jpg',
+      'cat/HolderleCats/cat45 (39).jpg',
+      'cat/HolderleCats/cat45 (40).jpg',
+      'cat/HolderleCats/cat45 (41).jpg',
+      'cat/HolderleCats/cat45 (42).jpg',
+      'cat/HolderleCats/cat45 (43).jpg',
+      'cat/HolderleCats/cat45 (44).jpg',
+      'cat/HolderleCats/cat45 (45).jpg',
+      'cat/HolderleCats/cat45 (46).jpg',
+      'cat/HolderleCats/cat45 (47).jpg',
+      'cat/HolderleCats/cat45 (48).jpg',
+      'cat/HolderleCats/cat45 (49).jpg',
+      'cat/HolderleCats/cat45 (50).jpg',
+      'cat/HolderleCats/cat45 (51).jpg',
+      'cat/HolderleCats/cat45 (52).jpg',
+      'cat/HolderleCats/cat45 (53).jpg',
+      'cat/HolderleCats/cat45 (54).jpg',
+      'cat/HolderleCats/cat45 (55).jpg',
+      'cat/HolderleCats/cat45 (56).jpg',
+      'cat/HolderleCats/cat45 (57).jpg',
+      'cat/HolderleCats/cat45 (58).jpg',
+      'cat/HolderleCats/cat45 (59).jpg',
+      'cat/HolderleCats/cat45 (60).jpg',
+      'cat/HolderleCats/cat45 (61).jpg',
+      'cat/HolderleCats/cat45 (62).jpg',
+      'cat/HolderleCats/cat45 (63).jpg',
+      'cat/HolderleCats/cat45 (64).jpg',
+      'cat/HolderleCats/cat45 (65).jpg',
+      'cat/HolderleCats/cat45 (66).jpg',
+      'cat/HolderleCats/cat45 (67).jpg',
+      'cat/HolderleCats/cat45 (68).jpg',
+      'cat/HolderleCats/cat45 (69).jpg',
+      'cat/HolderleCats/cat45 (70).jpg',
+      'cat/HolderleCats/cat45 (71).jpg',
+      'cat/HolderleCats/cat45 (72).jpg',
+      'cat/HolderleCats/cat45 (73).jpg',
+      'cat/HolderleCats/cat45 (74).jpg',
+      'cat/HolderleCats/cat45 (75).jpg',
+      'cat/HolderleCats/cat45 (76).jpg',
+      'cat/HolderleCats/cat45 (77).jpg',
+      'cat/HolderleCats/cat45 (78).jpg',
+      'cat/HolderleCats/cat45 (79).jpg',
+      'cat/HolderleCats/cat45 (80).jpg',
+      'cat/HolderleCats/cat45 (81).jpg',
+      'cat/HolderleCats/cat45 (82).jpg',
+      'cat/HolderleCats/cat45 (83).jpg',
+      'cat/HolderleCats/cat45 (84).jpg',
+      'cat/HolderleCats/cat45 (85).jpg',
+      'cat/HolderleCats/cat45 (86).jpg',
+      'cat/HolderleCats/cat45 (87).jpg',
+      'cat/HolderleCats/cat45 (88).jpg',
+      'cat/HolderleCats/cat45 (89).jpg',
+      'cat/HolderleCats/cat45 (90).jpg'
+    ];
+
+
+
+    const catContainer = document.getElementById('catContainer');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalImage = document.getElementById('modalImage');
+    const modalClose = document.getElementById('modalClose');
+
+    function triggerHolderleConfetti(targetImg) {
+  const rect = targetImg.getBoundingClientRect();
+
+  const confettiContainer = document.createElement('div');
+  confettiContainer.style.position = 'absolute';
+  confettiContainer.style.left = rect.left + window.scrollX + 'px';
+  confettiContainer.style.top = rect.top + window.scrollY + 'px';
+  confettiContainer.style.width = rect.width + 'px';
+  confettiContainer.style.height = rect.height + 'px';
+  confettiContainer.style.pointerEvents = 'none';
+  confettiContainer.style.overflow = 'visible';
+  confettiContainer.style.zIndex = '9999';
+  document.body.appendChild(confettiContainer);
+
+  for (let i = 0; i < 30; i++) { // Increased to 30 for better mobile effect
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+
+    const colors = ['#f2d74e', '#95c3de', '#ff9a9e', '#a1ffce', '#fbc2eb'];
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    // Position pieces across the width of the image
+    confetti.style.left = (Math.random() * rect.width) + 'px';
+    confetti.style.top = (Math.random() * 20) + 'px'; 
+    
+    // CREATE DRIFT: This gives each piece a random horizontal target between -100px and 100px
+    const randomDrift = (Math.random() * 200 - 100) + 'px';
+    confetti.style.setProperty('--drift', randomDrift);
+
+    confetti.style.opacity = 1;
+    confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+    
+    confettiContainer.appendChild(confetti);
+
+    confetti.addEventListener('animationend', () => {
+      confetti.remove();
+      if (confettiContainer.childElementCount === 0) {
+        confettiContainer.remove();
+      }
+    });
+  }
+}
+
+
+  function fetchCatImage() {
+    if (Math.random() < 0.10) {  // 10% chance to use local images
+      const randomIndex = Math.floor(Math.random() * localCatImages.length);
+      const imageUrl = localCatImages[randomIndex];
+
+      // Outer wrapper so it fits your grid like other images
+      const wrapper = document.createElement('div');
+      wrapper.className = 'gift-wrapper';
+
+      // Gift box AND hidden cat image (separate from the box)
+      wrapper.innerHTML = `
+        <div class="box holderle-gift">
+          <div class="box-body">
+            <div class="box-lid">
+              <div class="box-bowtie"></div>
+            </div>
+          </div>
+          <p class="gift-hint">Click to Open!</p>
+        </div>
+        <img class="cat-image holderle-cat" src="${imageUrl}" alt="A cute kitty" loading="lazy" style="display:none;">
+      `;
+
+      const box = wrapper.querySelector('.box');
+      const boxBody = wrapper.querySelector('.box-body');
+      const catImg = wrapper.querySelector('.cat-image');
+
+      // Click to open the gift
+      boxBody.addEventListener('click', () => {
+        // Prevent double-click replays
+        if (boxBody.classList.contains('opened')) return;
+        boxBody.classList.add('opened');
+
+        // After animation finishes, hide box, show cat, trigger confetti
+        setTimeout(() => {
+          box.style.display = 'none';
+          catImg.style.display = 'block';
+          catImg.classList.add('visible'); // reuse your fade-in class
+          triggerHolderleConfetti(catImg);
+        }, 1000); // match ~1s animation duration
+      });
+
+      // Modal only works once cat is visible
+      catImg.addEventListener('click', () => {
+        if (catImg.style.display !== 'block') return;
+        openModal(imageUrl);
+      });
+
+      wrapper.classList.add('fade-in-enter');
+      catContainer.appendChild(wrapper);
+
+      // trigger animation on next frame
+      requestAnimationFrame(() => {
+        wrapper.classList.add('fade-in-enter-active');
+      });
+      observer.observe(catImg); // for scroll fade-in (still works once shown)
+  } else {
+        // 80% chance fetch from cat API
+        fetch('https://api.thecatapi.com/v1/images/search')
+        .then(response => response.json())
+        .then(data => {
+          const imageUrl = data[0].url;
+          const imgElement = document.createElement('img');
+          imgElement.src = imageUrl;
+          imgElement.alt = 'A cute kitty';
+          imgElement.className = 'cat-image';
+          imgElement.loading = 'lazy';
+
+          // Click handler for modal
+          imgElement.addEventListener('click', () => {
+            openModal(imageUrl);
+          });
+
+          imgElement.classList.add('fade-in-enter');
+          catContainer.appendChild(imgElement);
+
+          requestAnimationFrame(() => {
+            imgElement.classList.add('fade-in-enter-active');
+          });
+
+          observer.observe(imgElement);
+        })
+        .catch(error => console.log('Error occurred: ' + error));
+      }
+    }
+
+
+    // Intersection Observer for images
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    });
+
+
+
+
+
+    document.getElementById('fetchButton').addEventListener('click', fetchCatImage);
+    fetchCatImage(); // initial fetch
+
+    // Show modal with image
+    function openModal(src) {
+      modalImage.src = src;
+      modalImage.style.maxHeight = '85vh';
+      modalImage.style.maxWidth = '100%';
+      modalOverlay.classList.add('visible');
+      modalOverlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden'; // prevent background scroll
+    }
+
+    // Close modal function
+    function closeModal() {
+      modalOverlay.classList.remove('visible');
+      modalOverlay.setAttribute('aria-hidden', 'true');
+      modalImage.src = '';
+      document.body.style.overflow = ''; // restore scroll
+    }
+
+    // Close modal on close button click
+    modalClose.addEventListener('click', closeModal);
+
+    // Close modal on clicking outside the image content
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        closeModal();
+      }
+    });
+
+    // Close modal on pressing Escape key
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape' && modalOverlay.classList.contains('visible')) {
+        closeModal();
+      }
+    });
+  </script>
+  </div>
+</body>
+</html>
