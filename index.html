@@ -4,6 +4,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playwrite+TZ:wght@100..400&display=swap" rel="stylesheet">
+  <script src="config.js"></script>
 
 
   <title>Cat Image Generator 🎁</title>
@@ -764,10 +765,22 @@
       });
       observer.observe(catImg); // for scroll fade-in (still works once shown)
   } else {
-        // 80% chance fetch from cat API
-        fetch('https://api.thecatapi.com/v1/images/search')
-        .then(response => response.json())
-        .then(data => {
+      // Use the variable from your config.js
+      fetch('https://api.thecatapi.com/v1/images/search', {
+          headers: {
+              'X-Api-Key': CAT_API_KEY
+          }
+      })
+      .then(response => {
+          // These will no longer be null!
+          const remaining = response.headers.get('pagination-remaining');
+          const limit = response.headers.get('pagination-limit');
+          
+          console.log(`Success! You have ${remaining} cats left for this period.`);
+          
+          return response.json();
+      })
+      .then(data => {
           const imageUrl = data[0].url;
           const imgElement = document.createElement('img');
           imgElement.src = imageUrl;
@@ -777,21 +790,21 @@
 
           // Click handler for modal
           imgElement.addEventListener('click', () => {
-            openModal(imageUrl);
+              openModal(imageUrl);
           });
 
           imgElement.classList.add('fade-in-enter');
           catContainer.appendChild(imgElement);
 
           requestAnimationFrame(() => {
-            imgElement.classList.add('fade-in-enter-active');
+              imgElement.classList.add('fade-in-enter-active');
           });
 
           observer.observe(imgElement);
-        })
-        .catch(error => console.log('Error occurred: ' + error));
-      }
+      })
+      .catch(error => console.log('Error occurred: ' + error));
     }
+  }
 
 
     // Intersection Observer for images
