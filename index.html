@@ -4,7 +4,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playwrite+TZ:wght@100..400&display=swap" rel="stylesheet">
-  <script src="config.js"></script>
 
 
   <title>Cat Image Generator 🎁</title>
@@ -765,7 +764,6 @@
       });
       observer.observe(catImg); // for scroll fade-in (still works once shown)
   } else {
-      // Use the variable from your config.js
       fetch('https://api.thecatapi.com/v1/images/search', {
           headers: {
               'X-Api-Key': 'live_xGL5NQRPR79FrEE3l9KFbQIAKKrZm58spY0Q0a9ipAMYugJ9v3ye8AVOu9TrVvXY'
