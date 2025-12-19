@@ -768,16 +768,12 @@
       // Use the variable from your config.js
       fetch('https://api.thecatapi.com/v1/images/search', {
           headers: {
-              'X-Api-Key': CAT_API_KEY
+              'X-Api-Key': 'live_xGL5NQRPR79FrEE3l9KFbQIAKKrZm58spY0Q0a9ipAMYugJ9v3ye8AVOu9TrVvXY'
           }
       })
       .then(response => {
-          // These will no longer be null!
           const remaining = response.headers.get('pagination-remaining');
-          const limit = response.headers.get('pagination-limit');
-          
-          console.log(`Success! You have ${remaining} cats left for this period.`);
-          
+          console.log(`Success! ${remaining} cats left in the tank.`);
           return response.json();
       })
       .then(data => {
